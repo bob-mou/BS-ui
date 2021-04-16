@@ -1,19 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="97px">
-      <el-form-item label="患者用户id号" prop="patientId">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="137px">
+      <el-form-item label="医生或患者的姓名" prop="doctorId">
         <el-input
-          v-model="queryParams.patientId"
-          placeholder="请输入患者用户id号"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="医生ID号" prop="doctorId">
-        <el-input
-          v-model="queryParams.doctorId"
-          placeholder="请输入医生ID号"
+          v-model="queryParams.doctorName"
+          placeholder="请输入医生或患者的姓名"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -83,8 +74,10 @@
 
     <el-table v-loading="loading" :data="collectList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="患者用户id号" align="center" prop="patientId" v-if="true"/>
-      <el-table-column label="医生ID号" align="center" prop="doctorId" v-if="true"/>
+      <el-table-column label="患者用户名称" align="center" prop="patientName" v-if="true"/>
+      <el-table-column label="医生姓名" align="center"  prop="doctorName" v-if="true"/>
+      <el-table-column label="患者用户ID" align="center" prop="patientId" v-if="false"/>
+      <el-table-column label="医生ID" align="center"  prop="doctorId" v-if="false"/>
       <el-table-column label="创建时间" align="center" prop="creatTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.creatTime, '{y}-{m}-{d}') }}</span>
@@ -123,6 +116,7 @@
     <!-- 添加或修改收藏管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio
@@ -177,16 +171,18 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        doctorId: undefined,
-        patientId: undefined,
+        doctorName: undefined,
         status: undefined,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
+        patientId: [
+          { required: true, message: "患者用户名称不能为空", trigger: "blur" }
+        ],
         doctorId: [
-          { required: true, message: "医生ID号不能为空", trigger: "blur" }
+          { required: true, message: "医生名称不能为空", trigger: "blur" }
         ],
         creatTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -259,7 +255,8 @@ export default {
     handleUpdate(row) {
       this.reset();
       const patientId = row.patientId || this.ids
-      getCollect(patientId).then(response => {
+      const doctorId = row.doctorId
+      getCollect(patientId,doctorId).then(response => {
         this.form = response.data;
         this.open = true;
         this.title = "修改收藏管理";

@@ -27,7 +27,11 @@ export function addCollect(data) {
 }
 
 // 修改收藏管理
-export function updateCollect(data) {
+export function updateCollect(patientId,doctorId) {
+  const data = {
+    patientId,
+    doctorId
+  }
   return request({
     url: '/bysj/collect',
     method: 'put',
